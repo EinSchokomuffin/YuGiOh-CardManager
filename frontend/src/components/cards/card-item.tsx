@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import type { Card as CardType, Printing } from "@/lib/types";
-import { cn, formatPrice, getRarityColor, getFrameColor } from "@/lib/utils";
+import { cn, formatPrice, getRarityColor, getFrameColor, getCardName } from "@/lib/utils";
+import { useAuthStore } from "@/lib/store";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Plus, Eye } from "lucide-react";
@@ -14,6 +15,9 @@ interface CardGridItemProps {
 }
 
 export function CardGridItem({ card, onSelect, onAddToCollection }: CardGridItemProps) {
+  const { user } = useAuthStore();
+  const displayName = getCardName(card, user?.searchLanguage || 'DE');
+  
   return (
     <div
       className={cn(
@@ -26,7 +30,7 @@ export function CardGridItem({ card, onSelect, onAddToCollection }: CardGridItem
       <div className="relative aspect-[3/4] w-full overflow-hidden">
         <Image
           src={card.imageUrlSmall || card.imageUrl}
-          alt={card.name}
+          alt={displayName}
           fill
           className="object-cover transition-transform group-hover:scale-105"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
@@ -53,7 +57,7 @@ export function CardGridItem({ card, onSelect, onAddToCollection }: CardGridItem
 
       {/* Card Info */}
       <div className="p-3">
-        <h3 className="truncate font-medium text-sm">{card.name}</h3>
+        <h3 className="truncate font-medium text-sm">{displayName}</h3>
         <p className="text-xs text-muted-foreground">{card.type}</p>
         
         {/* Stats for monsters */}
@@ -83,6 +87,9 @@ interface CardListItemProps {
 }
 
 export function CardListItem({ card, printing, onSelect, onAddToCollection }: CardListItemProps) {
+  const { user } = useAuthStore();
+  const displayName = getCardName(card, user?.searchLanguage || 'DE');
+  
   return (
     <div
       className="flex items-center gap-4 rounded-lg border bg-card p-4 transition-colors hover:bg-accent cursor-pointer"
@@ -92,7 +99,7 @@ export function CardListItem({ card, printing, onSelect, onAddToCollection }: Ca
       <div className="relative h-20 w-14 shrink-0 overflow-hidden rounded">
         <Image
           src={card.imageUrlSmall || card.imageUrl}
-          alt={card.name}
+          alt={displayName}
           fill
           className="object-cover"
         />
@@ -100,7 +107,7 @@ export function CardListItem({ card, printing, onSelect, onAddToCollection }: Ca
 
       {/* Card Info */}
       <div className="flex-1 min-w-0">
-        <h3 className="font-medium">{card.name}</h3>
+        <h3 className="font-medium">{displayName}</h3>
         <p className="text-sm text-muted-foreground">{card.type}</p>
         {printing && (
           <div className="mt-1 flex items-center gap-2">

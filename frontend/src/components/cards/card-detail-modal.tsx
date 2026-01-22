@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Card, Printing, CardCondition, CardEdition, PortfolioType } from "@/lib/types";
-import { cn, formatPrice, getRarityColor, getConditionLabel, getEditionLabel } from "@/lib/utils";
+import { cn, formatPrice, getRarityColor, getConditionLabel, getEditionLabel, getCardName } from "@/lib/utils";
 import apiClient from "@/lib/api";
 import {
   Dialog,
@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Loader2, Check } from "lucide-react";
-import { useToastStore } from "@/lib/store";
+import { useToastStore, useAuthStore } from "@/lib/store";
 
 interface CardDetailModalProps {
   card: Card | null;
@@ -59,6 +59,8 @@ const LANGUAGES = [
 export function CardDetailModal({ card, open, onOpenChange }: CardDetailModalProps) {
   const queryClient = useQueryClient();
   const { addToast } = useToastStore();
+  const { user } = useAuthStore();
+  const displayName = card ? getCardName(card, user?.searchLanguage || 'DE') : '';
   
   const [selectedPrinting, setSelectedPrinting] = useState<Printing | null>(null);
   const [quantity, setQuantity] = useState(1);
@@ -114,7 +116,7 @@ export function CardDetailModal({ card, open, onOpenChange }: CardDetailModalPro
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{card.name}</DialogTitle>
+          <DialogTitle>{displayName}</DialogTitle>
           <DialogDescription>{card.type}</DialogDescription>
         </DialogHeader>
 
@@ -123,7 +125,7 @@ export function CardDetailModal({ card, open, onOpenChange }: CardDetailModalPro
           <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg">
             <Image
               src={card.imageUrl}
-              alt={card.name}
+              alt={displayName}
               fill
               className="object-contain"
               priority

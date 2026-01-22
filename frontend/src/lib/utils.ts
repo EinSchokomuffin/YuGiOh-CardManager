@@ -74,3 +74,18 @@ export function getEditionLabel(edition: string): string {
   };
   return labels[edition] || edition;
 }
+
+export function getCardName(
+  card: { name: string; nameEn: string; nameDe?: string },
+  language: 'DE' | 'EN' | 'FR' | 'IT' | 'PT' = 'DE'
+): string {
+  switch (language) {
+    case 'EN':
+      return card.nameEn || card.name;
+    case 'DE':
+      return card.nameDe || card.name;
+    default:
+      // For FR, IT, PT we don't have translations yet, fallback to name
+      return card.name;
+  }
+}

@@ -18,13 +18,25 @@ export class CardsService {
    */
   async searchCards(dto: SearchCardsDto) {
     const where: Prisma.CardWhereInput = {};
+    const language = dto.language || 'DE';
 
     if (dto.name) {
-      where.OR = [
-        { name: { contains: dto.name, mode: 'insensitive' } },
-        { nameEn: { contains: dto.name, mode: 'insensitive' } },
-        { nameDe: { contains: dto.name, mode: 'insensitive' } },
-      ];
+      // Search in the appropriate language field
+      if (language === 'EN') {
+        where.nameEn = { contains: dto.name, mode: 'insensitive' };
+      } else if (language === 'DE') {
+        where.OR = [
+          { nameDe: { contains: dto.name, mode: 'insensitive' } },
+          { name: { contains: dto.name, mode: 'insensitive' } },
+        ];
+      } else {
+        // For other languages, search in all name fields
+        where.OR = [
+          { name: { contains: dto.name, mode: 'insensitive' } },
+          { nameEn: { contains: dto.name, mode: 'insensitive' } },
+          { nameDe: { contains: dto.name, mode: 'insensitive' } },
+        ];
+      }
     }
 
     if (dto.type) {

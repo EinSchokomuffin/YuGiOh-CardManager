@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsNumber, Min } from 'class-validator';
+import { IsOptional, IsString, IsNumber, Min, IsIn } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -7,6 +7,12 @@ export class SearchCardsDto {
   @IsOptional()
   @IsString()
   name?: string;
+
+  @ApiPropertyOptional({ description: 'Search language for card names', enum: ['DE', 'EN', 'FR', 'IT', 'PT'] })
+  @IsOptional()
+  @IsString()
+  @IsIn(['DE', 'EN', 'FR', 'IT', 'PT'])
+  language?: string;
 
   @ApiPropertyOptional({ description: 'Card type (e.g., "Effect Monster")' })
   @IsOptional()

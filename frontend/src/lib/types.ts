@@ -143,6 +143,7 @@ export interface SearchCardsParams {
   type?: string;
   archetype?: string;
   attribute?: string;
+  language?: 'DE' | 'EN' | 'FR' | 'IT' | 'PT';
   limit?: number;
   offset?: number;
 }

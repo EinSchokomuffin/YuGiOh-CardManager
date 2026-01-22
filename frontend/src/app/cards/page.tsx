@@ -77,6 +77,7 @@ export default function CardsPage() {
         type: filters.type,
         attribute: filters.attribute,
         archetype: filters.archetype,
+        language: searchLanguage,
         limit,
         offset: page * limit,
       }),
