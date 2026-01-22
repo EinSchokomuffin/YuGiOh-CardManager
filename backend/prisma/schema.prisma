@@ -1,0 +1,182 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  tier      UserTier @default(FREE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  collectionItems CollectionItem[]
+  decks           Deck[]
+  wantList        WantListItem[]
+
+  @@map("users")
+}
+
+enum UserTier {
+  FREE
+  PRO
+}
+
+// Base card information from YGOPRODeck
+model Card {
+  id          String  @id @default(uuid())
+  konamiId    Int     @unique
+  name        String
+  nameEn      String
+  nameDe      String?
+  type        String
+  frameType   String
+  description String
+  race        String?
+  atk         Int?
+  def         Int?
+  level       Int?
+  attribute   String?
+  archetype   String?
+  imageUrl    String
+  imageUrlSmall String?
+
+  printings Printing[]
+
+  @@index([name])
+  @@index([konamiId])
+  @@map("cards")
+}
+
+// Specific printings of cards (set versions)
+model Printing {
+  id        String   @id @default(uuid())
+  cardId    String
+  setCode   String
+  setName   String
+  rarity    String
+  rarityCode String
+  price     Float?
+  priceUpdatedAt DateTime?
+
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  collectionItems CollectionItem[]
+  wantListItems   WantListItem[]
+  deckCards       DeckCard[]
+
+  @@unique([cardId, setCode])
+  @@index([setCode])
+  @@map("printings")
+}
+
+// User's collection items
+model CollectionItem {
+  id              String          @id @default(uuid())
+  userId          String
+  printingId      String
+  condition       CardCondition   @default(NEAR_MINT)
+  language        String          @default("EN")
+  edition         CardEdition     @default(UNLIMITED)
+  quantity        Int             @default(1)
+  purchasePrice   Float?
+  storageLocation String?
+  portfolio       PortfolioType   @default(COLLECTION)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  printing Printing @relation(fields: [printingId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, printingId, condition, language, edition])
+  @@index([userId])
+  @@map("collection_items")
+}
+
+enum CardCondition {
+  MINT
+  NEAR_MINT
+  EXCELLENT
+  GOOD
+  LIGHT_PLAYED
+  PLAYED
+  POOR
+}
+
+enum CardEdition {
+  FIRST_EDITION
+  UNLIMITED
+  LIMITED
+}
+
+enum PortfolioType {
+  COLLECTION
+  TRADES
+  BULK
+}
+
+// User's want list
+model WantListItem {
+  id          String   @id @default(uuid())
+  userId      String
+  printingId  String
+  quantity    Int      @default(1)
+  maxPrice    Float?
+  priority    Int      @default(1)
+  createdAt   DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  printing Printing @relation(fields: [printingId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, printingId])
+  @@map("want_list_items")
+}
+
+// User's decks
+model Deck {
+  id          String   @id @default(uuid())
+  userId      String
+  name        String
+  description String?
+  format      String?
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cards DeckCard[]
+
+  @@index([userId])
+  @@map("decks")
+}
+
+// Cards in a deck
+model DeckCard {
+  id         String       @id @default(uuid())
+  deckId     String
+  printingId String
+  quantity   Int          @default(1)
+  deckZone   DeckZone     @default(MAIN)
+
+  deck     Deck     @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  printing Printing @relation(fields: [printingId], references: [id], onDelete: Cascade)
+
+  @@unique([deckId, printingId, deckZone])
+  @@map("deck_cards")
+}
+
+enum DeckZone {
+  MAIN
+  EXTRA
+  SIDE
+}
