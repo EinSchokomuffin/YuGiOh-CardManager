@@ -43,7 +43,12 @@ interface AppState {
   toggleSidebar: () => void;
   setSidebarOpen: (open: boolean) => void;
   theme: "light" | "dark";
+  setTheme: (theme: "light" | "dark") => void;
   toggleTheme: () => void;
+  currency: "EUR" | "USD" | "GBP";
+  setCurrency: (currency: "EUR" | "USD" | "GBP") => void;
+  language: "de" | "en" | "fr";
+  setLanguage: (language: "de" | "en" | "fr") => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -53,7 +58,12 @@ export const useAppStore = create<AppState>()(
       toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
       setSidebarOpen: (open) => set({ sidebarOpen: open }),
       theme: "dark",
+      setTheme: (theme) => set({ theme }),
       toggleTheme: () => set((state) => ({ theme: state.theme === "light" ? "dark" : "light" })),
+      currency: "EUR",
+      setCurrency: (currency) => set({ currency }),
+      language: "de",
+      setLanguage: (language) => set({ language }),
     }),
     {
       name: "duelvault-app-store",

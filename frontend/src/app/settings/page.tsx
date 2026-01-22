@@ -57,12 +57,12 @@ export default function SettingsPage() {
 
   // Sync cards mutation
   const syncMutation = useMutation({
-    mutationFn: () => apiClient.syncCardsFromYGOPRODeck(),
+    mutationFn: () => apiClient.syncCards(),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["cards"] });
       addToast({
         title: "Synchronisation abgeschlossen",
-        description: `${data.imported} Karten importiert, ${data.updated} aktualisiert.`,
+        description: `${data.cardsCreated} Karten importiert, ${data.cardsUpdated} aktualisiert.`,
         type: "success",
       });
     },
@@ -78,12 +78,12 @@ export default function SettingsPage() {
   // Export collection
   const handleExportData = async () => {
     try {
-      const collection = await apiClient.getCollection("COLLECTION");
+      const collectionData = await apiClient.getCollection();
       const decks = await apiClient.getDecks();
       
       const exportData = {
         exportedAt: new Date().toISOString(),
-        collection,
+        collection: collectionData.data,
         decks,
       };
 
@@ -172,7 +172,7 @@ export default function SettingsPage() {
           <CardContent className="space-y-4">
             <div>
               <label className="text-sm font-medium">Theme</label>
-              <Select value={theme} onValueChange={(v) => setTheme(v as "light" | "dark" | "system")}>
+              <Select value={theme} onValueChange={(v) => setTheme(v as "light" | "dark")}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -187,12 +187,6 @@ export default function SettingsPage() {
                     <div className="flex items-center gap-2">
                       <Moon className="h-4 w-4" />
                       Dunkel
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="system">
-                    <div className="flex items-center gap-2">
-                      <Settings className="h-4 w-4" />
-                      System
                     </div>
                   </SelectItem>
                 </SelectContent>

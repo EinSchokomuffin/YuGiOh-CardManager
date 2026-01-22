@@ -10,6 +10,9 @@ RUN npm ci && npm cache clean --force
 # Copy source code
 COPY . .
 
+# Create public folder if it doesn't exist
+RUN mkdir -p public
+
 # Build arguments
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
@@ -27,6 +30,9 @@ ENV NODE_ENV=production
 # Create user
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
+
+# Create public folder
+RUN mkdir -p public && chown nextjs:nodejs public
 
 # Copy built application
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public

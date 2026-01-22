@@ -39,10 +39,12 @@ export default function MarketPage() {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   // Fetch collection for price tracking
-  const { data: collection, isLoading: collectionLoading } = useQuery({
-    queryKey: ["collection", "COLLECTION"],
-    queryFn: () => apiClient.getCollection("COLLECTION"),
+  const { data: collectionData, isLoading: collectionLoading } = useQuery({
+    queryKey: ["collection"],
+    queryFn: () => apiClient.getCollection(),
   });
+  
+  const collection = collectionData?.data;
 
   // Fetch price data for search
   const { data: searchResults, isLoading: searchLoading } = useQuery({
