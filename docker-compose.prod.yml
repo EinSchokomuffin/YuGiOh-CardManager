@@ -1,8 +1,10 @@
+# Production Docker Compose - Use with: docker-compose -f docker-compose.prod.yml up -d
 version: '3.8'
 
 services:
   postgres:
     image: postgres:16-alpine
+    container_name: duelvault_postgres_prod
     restart: always
     environment:
       POSTGRES_USER: duelvault
@@ -10,6 +12,8 @@ services:
       POSTGRES_DB: duelvault_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - duelvault_network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U duelvault -d duelvault_db"]
       interval: 5s
@@ -20,6 +24,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.backend
+    container_name: duelvault_backend_prod
     restart: always
     depends_on:
       postgres:
@@ -29,24 +34,35 @@ services:
       NODE_ENV: production
       PORT: 3001
       JWT_SECRET: ${JWT_SECRET}
-      JWT_EXPIRATION: 7d
-      CORS_ORIGIN: ${FRONTEND_URL}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-7d}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      LOG_LEVEL: info
     ports:
-      - "3001:3001"
+      - "8081:3001"  # External:Internal - Backend API
+    networks:
+      - duelvault_network
 
   frontend:
     build:
       context: .
       dockerfile: Dockerfile.frontend
       args:
-        NEXT_PUBLIC_API_URL: ${API_URL}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    container_name: duelvault_frontend_prod
     restart: always
     depends_on:
       - backend
-    ports:
-      - "3000:3000"
     environment:
       NODE_ENV: production
+    ports:
+      - "8080:3000"  # External:Internal - Frontend Web
+    networks:
+      - duelvault_network
 
 volumes:
   postgres_data:
+    driver: local
+
+networks:
+  duelvault_network:
+    driver: bridge

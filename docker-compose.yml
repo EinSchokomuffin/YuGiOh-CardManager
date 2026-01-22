@@ -4,34 +4,59 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: duelvault_postgres
+    restart: unless-stopped
     environment:
       POSTGRES_USER: duelvault
-      POSTGRES_PASSWORD: duelvault_password
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-duelvault_password}
       POSTGRES_DB: duelvault_db
       POSTGRES_INITDB_ARGS: "--encoding=UTF8"
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - duelvault_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U duelvault"]
-      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U duelvault -d duelvault_db"]
+      interval: 5s
       timeout: 5s
       retries: 5
 
-  adminer:
-    image: adminer:latest
-    container_name: duelvault_adminer
-    ports:
-      - "8080:8080"
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: duelvault_backend
+    restart: unless-stopped
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://duelvault:${DB_PASSWORD:-duelvault_password}@postgres:5432/duelvault_db
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3001
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-7d}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+    ports:
+      - "${BACKEND_PORT:-8081}:3001"
     networks:
       - duelvault_network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8081/api/v1}
+    container_name: duelvault_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
     environment:
-      ADMINER_DEFAULT_SERVER: postgres
+      NODE_ENV: ${NODE_ENV:-production}
+    ports:
+      - "${FRONTEND_PORT:-8080}:3000"
+    networks:
+      - duelvault_network
 
 volumes:
   postgres_data:
