@@ -228,7 +228,7 @@ export class CardsService {
       cardsCreated,
       cardsUpdated,
       printingsCreated,
-      totalCards: ygoCards.length,
+      totalCards: ygoCardsDE.length,
     };
   }
 
