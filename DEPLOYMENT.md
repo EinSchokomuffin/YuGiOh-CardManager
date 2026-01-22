@@ -37,8 +37,8 @@ curl -X POST http://localhost:8081/api/v1/ygoprodeck/sync
 
 ## Ports
 
-- **Frontend**: http://localhost:8080
-- **Backend API**: http://localhost:8081
+- **Frontend**: http://localhost:7843 (nicht-standard Port)
+- **Backend API**: http://localhost:7844 (nicht-standard Port)
 - **PostgreSQL**: intern (nicht exponiert)
 
 ## Umgebungsvariablen

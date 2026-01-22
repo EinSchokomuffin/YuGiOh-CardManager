@@ -52,8 +52,8 @@ Für `docker-compose.yml` und `docker-compose.prod.yml`:
 | `CORS_ORIGIN` | Frontend URL | `https://duelvault.de` | ✅ |
 | `NEXT_PUBLIC_API_URL` | API URL für Frontend | `https://api.duelvault.de/api/v1` | ✅ |
 | `NODE_ENV` | Umgebung | `production` | ❌ (Default: `production`) |
-| `FRONTEND_PORT` | Externer Frontend Port | `8080` | ❌ (Default: `8080`) |
-| `BACKEND_PORT` | Externer Backend Port | `8081` | ❌ (Default: `8081`) |
+| `FRONTEND_PORT` | Externer Frontend Port | `7843` | ❌ (Default: `7843`) |
+| `BACKEND_PORT` | Externer Backend Port | `7844` | ❌ (Default: `7844`) |
 
 ---
 
