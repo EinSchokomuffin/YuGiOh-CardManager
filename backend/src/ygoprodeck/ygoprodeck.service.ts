@@ -77,6 +77,21 @@ export class YgoprodeckService {
   }
 
   /**
+   * Fetch all cards from YGOPRODeck API (English)
+   */
+  async fetchAllCardsEnglish(): Promise<YGOCard[]> {
+    try {
+      this.logger.log('Fetching all cards from YGOPRODeck API (English)...');
+      const response = await this.client.get<YGOAPIResponse>('/cardinfo.php');
+      this.logger.log(`Fetched ${response.data.data.length} English cards`);
+      return response.data.data;
+    } catch (error) {
+      this.logger.error('Failed to fetch English cards from YGOPRODeck API', error);
+      throw error;
+    }
+  }
+
+  /**
    * Fetch a single card by name
    */
   async fetchCardByName(name: string): Promise<YGOCard | null> {

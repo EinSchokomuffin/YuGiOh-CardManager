@@ -51,6 +51,16 @@ export class CardsService {
       where.attribute = dto.attribute;
     }
 
+    // Determine sort order based on language
+    let orderBy: Prisma.CardOrderByWithRelationInput;
+    if (language === 'EN') {
+      orderBy = { nameEn: 'asc' };
+    } else if (language === 'DE') {
+      orderBy = { name: 'asc' }; // name is typically German
+    } else {
+      orderBy = { name: 'asc' };
+    }
+
     const [cards, total] = await Promise.all([
       this.prisma.card.findMany({
         where,
@@ -59,7 +69,7 @@ export class CardsService {
         },
         take: dto.limit || 20,
         skip: dto.offset || 0,
-        orderBy: { name: 'asc' },
+        orderBy,
       }),
       this.prisma.card.count({ where }),
     ]);
@@ -132,14 +142,26 @@ export class CardsService {
   async syncFromYgoprodeck() {
     this.logger.log('Starting full card sync from YGOPRODeck...');
     
-    const ygoCards = await this.ygoprodeckService.fetchAllCards();
+    // Fetch both German and English cards
+    const [ygoCardsDE, ygoCardsEN] = await Promise.all([
+      this.ygoprodeckService.fetchAllCards(),
+      this.ygoprodeckService.fetchAllCardsEnglish(),
+    ]);
+
+    // Create a map of English names by Konami ID
+    const englishNamesMap = new Map<number, string>();
+    for (const card of ygoCardsEN) {
+      englishNamesMap.set(card.id, card.name);
+    }
+
     let cardsCreated = 0;
     let cardsUpdated = 0;
     let printingsCreated = 0;
 
-    for (const ygoCard of ygoCards) {
+    for (const ygoCard of ygoCardsDE) {
       try {
-        const result = await this.upsertCardFromYgo(ygoCard);
+        const englishName = englishNamesMap.get(ygoCard.id) || ygoCard.name;
+        const result = await this.upsertCardFromYgo(ygoCard, englishName);
         if (result.created) cardsCreated++;
         else cardsUpdated++;
         printingsCreated += result.printingsCreated;
@@ -155,7 +177,7 @@ export class CardsService {
       cardsCreated,
       cardsUpdated,
       printingsCreated,
-      totalCards: ygoCards.length,
+      totalCards: ygoCardsDE.length,
     };
   }
 
@@ -165,18 +187,30 @@ export class CardsService {
   async syncFromYgoprodeckBatch(batchSize: number) {
     this.logger.log(`Starting batch sync with batch size ${batchSize}...`);
     
-    const ygoCards = await this.ygoprodeckService.fetchAllCards();
+    // Fetch both German and English cards
+    const [ygoCardsDE, ygoCardsEN] = await Promise.all([
+      this.ygoprodeckService.fetchAllCards(),
+      this.ygoprodeckService.fetchAllCardsEnglish(),
+    ]);
+
+    // Create a map of English names by Konami ID
+    const englishNamesMap = new Map<number, string>();
+    for (const card of ygoCardsEN) {
+      englishNamesMap.set(card.id, card.name);
+    }
+
     let cardsCreated = 0;
     let cardsUpdated = 0;
     let printingsCreated = 0;
 
-    for (let i = 0; i < ygoCards.length; i += batchSize) {
-      const batch = ygoCards.slice(i, i + batchSize);
+    for (let i = 0; i < ygoCardsDE.length; i += batchSize) {
+      const batch = ygoCardsDE.slice(i, i + batchSize);
       
       await Promise.all(
         batch.map(async (ygoCard) => {
           try {
-            const result = await this.upsertCardFromYgo(ygoCard);
+            const englishName = englishNamesMap.get(ygoCard.id) || ygoCard.name;
+            const result = await this.upsertCardFromYgo(ygoCard, englishName);
             if (result.created) cardsCreated++;
             else cardsUpdated++;
             printingsCreated += result.printingsCreated;
@@ -186,7 +220,7 @@ export class CardsService {
         }),
       );
 
-      this.logger.log(`Processed batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(ygoCards.length / batchSize)}`);
+      this.logger.log(`Processed batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(ygoCardsDE.length / batchSize)}`);
     }
 
     return {
@@ -201,16 +235,16 @@ export class CardsService {
   /**
    * Upsert a single card from YGOPRODeck data
    */
-  private async upsertCardFromYgo(ygoCard: YGOCard) {
+  private async upsertCardFromYgo(ygoCard: YGOCard, englishName?: string) {
     const existingCard = await this.prisma.card.findUnique({
       where: { konamiId: ygoCard.id },
     });
 
     const cardData = {
       konamiId: ygoCard.id,
-      name: ygoCard.name,
-      nameEn: ygoCard.name,
-      nameDe: ygoCard.name,
+      name: ygoCard.name, // German name from DE API
+      nameEn: englishName || ygoCard.name, // English name
+      nameDe: ygoCard.name, // German name
       type: ygoCard.type,
       frameType: ygoCard.frameType,
       description: ygoCard.desc,
