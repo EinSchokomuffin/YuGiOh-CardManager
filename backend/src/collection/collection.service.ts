@@ -125,7 +125,6 @@ export class CollectionService {
 
     if (dto.search) {
       where.printing = {
-        ...where.printing,
         card: {
           OR: [
             { name: { contains: dto.search, mode: 'insensitive' } },
@@ -370,5 +369,48 @@ export class CollectionService {
       storageLocation: item.storageLocation,
       portfolio: item.portfolio,
     }));
+  }
+
+  /**
+   * Get collection statistics
+   */
+  async getStats(userId: string) {
+    const collectionItems = await this.prisma.collectionItem.findMany({
+      where: { userId },
+      include: {
+        printing: true,
+      },
+    });
+
+    if (collectionItems.length === 0) {
+      return {
+        totalCards: 0,
+        totalValue: 0,
+        byPortfolio: {},
+        avgCondition: null,
+      };
+    }
+
+    let totalCards = 0;
+    let totalValue = 0;
+    const byPortfolio: any = {};
+
+    collectionItems.forEach((item) => {
+      totalCards += item.quantity;
+      totalValue += (item.printing.price || 0) * item.quantity;
+
+      if (!byPortfolio[item.portfolio]) {
+        byPortfolio[item.portfolio] = { count: 0, value: 0 };
+      }
+      byPortfolio[item.portfolio].count += item.quantity;
+      byPortfolio[item.portfolio].value += (item.printing.price || 0) * item.quantity;
+    });
+
+    return {
+      totalCards,
+      totalValue: Math.round(totalValue * 100) / 100,
+      byPortfolio,
+      uniqueCards: collectionItems.length,
+    };
   }
 }

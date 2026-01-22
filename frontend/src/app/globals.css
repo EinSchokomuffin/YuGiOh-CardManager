@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 @layer base {
   :root {
@@ -10,105 +8,128 @@
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 43 74% 49%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 43 96% 56%;
+    --primary-foreground: 0 0% 0%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 43 96% 56%;
+    --accent-foreground: 0 0% 0%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 43 74% 49%;
-    --radius: 0.5rem;
+    --ring: 43 96% 56%;
+    --radius: 0.75rem;
+    
+    /* Custom DuelVault colors */
+    --gold: 43 96% 56%;
+    --gold-dark: 38 92% 50%;
+    --purple-glow: 280 100% 70%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 43 74% 49%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 43 74% 49%;
+    --background: 240 10% 6%;
+    --foreground: 0 0% 95%;
+    --card: 240 10% 9%;
+    --card-foreground: 0 0% 95%;
+    --popover: 240 10% 9%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 43 96% 56%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 240 5% 16%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 240 5% 16%;
+    --muted-foreground: 240 5% 60%;
+    --accent: 43 96% 56%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 5% 18%;
+    --input: 240 5% 18%;
+    --ring: 43 96% 56%;
+    
+    /* Custom DuelVault colors */
+    --gold: 43 96% 56%;
+    --gold-dark: 38 92% 50%;
+    --purple-glow: 280 100% 70%;
   }
 }
 
 @layer base {
   * {
-    @apply border-border;
+    /* Use CSS var for border color since Tailwind v4 no longer exposes border-border */
+    border-color: hsl(var(--border));
   }
   body {
-    @apply bg-background text-foreground;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
   }
 }
 
 @layer components {
   .card-rarity-common {
-    @apply border-gray-400;
+    border: 1px solid #9ca3af; /* gray-400 */
   }
   .card-rarity-rare {
-    @apply border-blue-500;
+    border: 1px solid #3b82f6; /* blue-500 */
   }
   .card-rarity-super {
-    @apply border-cyan-400;
+    border: 1px solid #22d3ee; /* cyan-400 */
   }
   .card-rarity-ultra {
-    @apply border-yellow-400;
+    border: 1px solid #facc15; /* yellow-400 */
   }
   .card-rarity-secret {
-    @apply border-purple-500;
+    border: 1px solid #a855f7; /* purple-500 */
   }
   .card-rarity-ultimate {
-    @apply border-gradient-to-r from-yellow-400 via-purple-500 to-cyan-400;
+    border: 2px solid transparent;
+    border-image: linear-gradient(90deg, #facc15, #a855f7, #22d3ee) 1;
+    border-radius: 0.5rem;
   }
 }
 
 /* Card hover effects */
 .card-hover {
-  @apply transition-all duration-300 hover:scale-105 hover:shadow-xl;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateZ(0);
+}
+
+.card-hover:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
 }
 
 /* Yu-Gi-Oh card frame colors */
 .frame-normal {
-  @apply bg-amber-100;
+  background-color: #fef3c7; /* amber-100 */
 }
 .frame-effect {
-  @apply bg-orange-200;
+  background-color: #fed7aa; /* orange-200 */
 }
 .frame-ritual {
-  @apply bg-blue-300;
+  background-color: #93c5fd; /* blue-300 */
 }
 .frame-fusion {
-  @apply bg-purple-300;
+  background-color: #d8b4fe; /* purple-300 */
 }
 .frame-synchro {
-  @apply bg-gray-100;
+  background-color: #f3f4f6; /* gray-100 */
 }
 .frame-xyz {
-  @apply bg-gray-900 text-white;
+  background-color: #111827; /* gray-900 */
+  color: #ffffff;
 }
 .frame-link {
-  @apply bg-blue-600 text-white;
+  background-color: #2563eb; /* blue-600 */
+  color: #ffffff;
 }
 .frame-spell {
-  @apply bg-teal-400;
+  background-color: #38b2ac; /* teal-400 */
 }
 .frame-trap {
-  @apply bg-pink-400;
+  background-color: #f472b6; /* pink-400 */
 }

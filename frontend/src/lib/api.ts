@@ -15,9 +15,31 @@ import type {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1";
 
+// Auth types
+export interface RegisterPayload {
+  email: string;
+  username: string;
+  password: string;
+}
+
+export interface LoginPayload {
+  email: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  accessToken: string;
+  user: {
+    id: string;
+    email: string;
+    username: string;
+    tier: string;
+  };
+}
+
 class ApiClient {
   private client: AxiosInstance;
-  private userId: string = "demo-user-id";
+  private token: string | null = null;
 
   constructor() {
     this.client = axios.create({
@@ -27,15 +49,33 @@ class ApiClient {
       },
     });
 
-    // Add user ID to all requests
+    // Add auth token to all requests
     this.client.interceptors.request.use((config) => {
-      config.headers["x-user-id"] = this.userId;
+      if (this.token) {
+        config.headers["Authorization"] = `Bearer ${this.token}`;
+      }
       return config;
     });
   }
 
-  setUserId(userId: string) {
-    this.userId = userId;
+  setToken(token: string | null) {
+    this.token = token;
+  }
+
+  // Auth API
+  async register(payload: RegisterPayload): Promise<AuthResponse> {
+    const response = await this.client.post("/auth/register", payload);
+    return response.data;
+  }
+
+  async login(payload: LoginPayload): Promise<AuthResponse> {
+    const response = await this.client.post("/auth/login", payload);
+    return response.data;
+  }
+
+  async getProfile() {
+    const response = await this.client.get("/auth/profile");
+    return response.data;
   }
 
   // Health Check

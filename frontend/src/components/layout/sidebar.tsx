@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Home,
   Search,
@@ -12,10 +12,13 @@ import {
   X,
   Sparkles,
   TrendingUp,
+  LogOut,
+  User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { useAppStore } from "@/lib/store";
+import { useAppStore, useAuthStore } from "@/lib/store";
+import apiClient from "@/lib/api";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: Home },
@@ -27,7 +30,15 @@ const navigation = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { sidebarOpen, toggleSidebar } = useAppStore();
+  const { user, isAuthenticated, logout } = useAuthStore();
+
+  const handleLogout = () => {
+    logout();
+    apiClient.setToken(null);
+    router.push("/login");
+  };
 
   return (
     <>
@@ -90,7 +101,36 @@ export function Sidebar() {
         </nav>
 
         {/* Bottom section */}
-        <div className="absolute bottom-0 left-0 right-0 border-t p-4">
+        <div className="absolute bottom-0 left-0 right-0 border-t p-4 space-y-2">
+          {isAuthenticated && user ? (
+            <>
+              <div className="flex items-center gap-3 px-3 py-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-bold">
+                  {user.username.charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{user.username}</p>
+                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-3 text-muted-foreground hover:text-red-500"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-5 w-5" />
+                Abmelden
+              </Button>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium bg-gradient-to-r from-yellow-500 to-amber-600 text-black hover:from-yellow-400 hover:to-amber-500"
+            >
+              <User className="h-5 w-5" />
+              Anmelden
+            </Link>
+          )}
           <Link
             href="/settings"
             className={cn(

@@ -198,6 +198,7 @@ export class CardsService {
       konamiId: ygoCard.id,
       name: ygoCard.name,
       nameEn: ygoCard.name,
+      nameDe: ygoCard.name,
       type: ygoCard.type,
       frameType: ygoCard.frameType,
       description: ygoCard.desc,

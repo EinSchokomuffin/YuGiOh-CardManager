@@ -7,111 +7,107 @@ import {
   Body,
   Param,
   Query,
-  Headers,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiHeader, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { CollectionService } from './collection.service';
 import { AddToCollectionDto } from './dto/add-to-collection.dto';
 import { GetCollectionDto } from './dto/get-collection.dto';
 import { UpdateCollectionItemDto } from './dto/update-collection-item.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+
+interface AuthenticatedRequest {
+  user: {
+    userId: string;
+    email: string;
+  };
+}
 
 @ApiTags('Collection')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('collection')
 export class CollectionController {
   constructor(private readonly collectionService: CollectionService) {}
 
-  // Note: In production, userId would come from JWT authentication
-  // For demo purposes, we use a header
-  private getUserId(userId?: string): string {
-    return userId || 'demo-user-id';
-  }
-
   @Post('add')
   @ApiOperation({ summary: 'Add a card to collection' })
-  @ApiHeader({ name: 'x-user-id', required: false, description: 'User ID (demo)' })
   async addToCollection(
-    @Headers('x-user-id') userId: string,
+    @Request() req: AuthenticatedRequest,
     @Body() dto: AddToCollectionDto,
   ) {
-    return this.collectionService.addToCollection(this.getUserId(userId), dto);
+    return this.collectionService.addToCollection(req.user.userId, dto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get user collection with filters' })
-  @ApiHeader({ name: 'x-user-id', required: false, description: 'User ID (demo)' })
   async getCollection(
-    @Headers('x-user-id') userId: string,
+    @Request() req: AuthenticatedRequest,
     @Query() dto: GetCollectionDto,
   ) {
-    return this.collectionService.getCollection(this.getUserId(userId), dto);
+    return this.collectionService.getCollection(req.user.userId, dto);
   }
 
   @Get('stats')
   @ApiOperation({ summary: 'Get collection statistics and value' })
-  @ApiHeader({ name: 'x-user-id', required: false, description: 'User ID (demo)' })
-  async getCollectionStats(@Headers('x-user-id') userId: string) {
-    return this.collectionService.getCollectionStats(this.getUserId(userId));
+  async getCollectionStats(@Request() req: AuthenticatedRequest) {
+    return this.collectionService.getCollectionStats(req.user.userId);
   }
 
   @Get('top-value')
   @ApiOperation({ summary: 'Get top value cards in collection' })
-  @ApiHeader({ name: 'x-user-id', required: false, description: 'User ID (demo)' })
   async getTopValueCards(
-    @Headers('x-user-id') userId: string,
+    @Request() req: AuthenticatedRequest,
     @Query('limit') limit?: number,
   ) {
-    return this.collectionService.getTopValueCards(this.getUserId(userId), limit);
+    return this.collectionService.getTopValueCards(req.user.userId, limit);
   }
 
   @Get('set-progress/:setCode')
   @ApiOperation({ summary: 'Get set completion progress' })
-  @ApiHeader({ name: 'x-user-id', required: false, description: 'User ID (demo)' })
   @ApiParam({ name: 'setCode', description: 'Set code prefix (e.g., LOB)' })
   async getSetProgress(
-    @Headers('x-user-id') userId: string,
+    @Request() req: AuthenticatedRequest,
     @Param('setCode') setCode: string,
   ) {
-    return this.collectionService.getSetProgress(this.getUserId(userId), setCode);
+    return this.collectionService.getSetProgress(req.user.userId, setCode);
   }
 
   @Get('export')
   @ApiOperation({ summary: 'Export collection to JSON' })
-  @ApiHeader({ name: 'x-user-id', required: false, description: 'User ID (demo)' })
-  async exportCollection(@Headers('x-user-id') userId: string) {
-    return this.collectionService.exportCollection(this.getUserId(userId));
+  async exportCollection(@Request() req: AuthenticatedRequest) {
+    return this.collectionService.exportCollection(req.user.userId);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a single collection item' })
-  @ApiHeader({ name: 'x-user-id', required: false, description: 'User ID (demo)' })
   @ApiParam({ name: 'id', description: 'Collection item ID' })
   async getCollectionItem(
-    @Headers('x-user-id') userId: string,
+    @Request() req: AuthenticatedRequest,
     @Param('id') id: string,
   ) {
-    return this.collectionService.getCollectionItem(this.getUserId(userId), id);
+    return this.collectionService.getCollectionItem(req.user.userId, id);
   }
 
   @Put(':id')
   @ApiOperation({ summary: 'Update a collection item' })
-  @ApiHeader({ name: 'x-user-id', required: false, description: 'User ID (demo)' })
   @ApiParam({ name: 'id', description: 'Collection item ID' })
   async updateCollectionItem(
-    @Headers('x-user-id') userId: string,
+    @Request() req: AuthenticatedRequest,
     @Param('id') id: string,
     @Body() dto: UpdateCollectionItemDto,
   ) {
-    return this.collectionService.updateCollectionItem(this.getUserId(userId), id, dto);
+    return this.collectionService.updateCollectionItem(req.user.userId, id, dto);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Remove a card from collection' })
-  @ApiHeader({ name: 'x-user-id', required: false, description: 'User ID (demo)' })
   @ApiParam({ name: 'id', description: 'Collection item ID' })
   async removeFromCollection(
-    @Headers('x-user-id') userId: string,
+    @Request() req: AuthenticatedRequest,
     @Param('id') id: string,
   ) {
-    return this.collectionService.removeFromCollection(this.getUserId(userId), id);
+    return this.collectionService.removeFromCollection(req.user.userId, id);
   }
 }

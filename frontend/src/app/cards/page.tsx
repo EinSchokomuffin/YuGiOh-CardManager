@@ -95,14 +95,14 @@ export default function CardsPage() {
 
         <div className="flex flex-wrap items-center gap-4">
           <Select
-            value={filters.type || ""}
-            onValueChange={(v) => setFilters({ type: v || undefined })}
+            value={filters.type || "all"}
+            onValueChange={(v) => setFilters({ type: v === "all" ? undefined : v })}
           >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Kartentyp" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Alle Typen</SelectItem>
+              <SelectItem value="all">Alle Typen</SelectItem>
               {CARD_TYPES.map((type) => (
                 <SelectItem key={type} value={type}>
                   {type}
@@ -112,14 +112,14 @@ export default function CardsPage() {
           </Select>
 
           <Select
-            value={filters.attribute || ""}
-            onValueChange={(v) => setFilters({ attribute: v || undefined })}
+            value={filters.attribute || "all"}
+            onValueChange={(v) => setFilters({ attribute: v === "all" ? undefined : v })}
           >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Attribut" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Alle Attribute</SelectItem>
+              <SelectItem value="all">Alle Attribute</SelectItem>
               {ATTRIBUTES.map((attr) => (
                 <SelectItem key={attr} value={attr}>
                   {attr}

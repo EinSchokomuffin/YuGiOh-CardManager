@@ -62,9 +62,9 @@ export function CardDetailModal({ card, open, onOpenChange }: CardDetailModalPro
   
   const [selectedPrinting, setSelectedPrinting] = useState<Printing | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const [condition, setCondition] = useState<CardCondition>("NEAR_MINT");
-  const [edition, setEdition] = useState<CardEdition>("UNLIMITED");
-  const [language, setLanguage] = useState("EN");
+  const [condition, setCondition] = useState<CardCondition>("GOOD");
+  const [edition, setEdition] = useState<CardEdition>("FIRST_EDITION");
+  const [language, setLanguage] = useState("DE");
   const [purchasePrice, setPurchasePrice] = useState<string>("");
 
   const { data: printings, isLoading: printingsLoading } = useQuery({
@@ -319,17 +319,17 @@ export function CardDetailModal({ card, open, onOpenChange }: CardDetailModalPro
                     </div>
 
                     <Button
-                      className="w-full"
-                      variant="gold"
+                      className="w-full h-14 text-lg font-bold bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-black shadow-lg hover:shadow-xl transition-all"
+                      size="lg"
                       onClick={handleAddToCollection}
                       disabled={addToCollectionMutation.isPending}
                     >
                       {addToCollectionMutation.isPending ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <Loader2 className="mr-2 h-6 w-6 animate-spin" />
                       ) : (
-                        <Plus className="mr-2 h-4 w-4" />
+                        <Plus className="mr-2 h-6 w-6" />
                       )}
-                      Zur Sammlung hinzufügen
+                      ✨ Zur Sammlung hinzufügen
                     </Button>
                   </>
                 ) : (

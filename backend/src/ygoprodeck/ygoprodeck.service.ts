@@ -60,13 +60,15 @@ export class YgoprodeckService {
   }
 
   /**
-   * Fetch all cards from YGOPRODeck API
+   * Fetch all cards from YGOPRODeck API (German)
    */
   async fetchAllCards(): Promise<YGOCard[]> {
     try {
-      this.logger.log('Fetching all cards from YGOPRODeck API...');
-      const response = await this.client.get<YGOAPIResponse>('/cardinfo.php');
-      this.logger.log(`Fetched ${response.data.data.length} cards`);
+      this.logger.log('Fetching all cards from YGOPRODeck API (German)...');
+      const response = await this.client.get<YGOAPIResponse>('/cardinfo.php', {
+        params: { language: 'de' },
+      });
+      this.logger.log(`Fetched ${response.data.data.length} German cards`);
       return response.data.data;
     } catch (error) {
       this.logger.error('Failed to fetch cards from YGOPRODeck API', error);
@@ -90,12 +92,12 @@ export class YgoprodeckService {
   }
 
   /**
-   * Fetch cards by fuzzy name search
+   * Fetch cards by fuzzy name search (German)
    */
   async searchCards(query: string): Promise<YGOCard[]> {
     try {
       const response = await this.client.get<YGOAPIResponse>('/cardinfo.php', {
-        params: { fname: query },
+        params: { fname: query, language: 'de' },
       });
       return response.data.data;
     } catch (error) {

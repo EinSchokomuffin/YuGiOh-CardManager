@@ -6,6 +6,7 @@ import { CollectionModule } from './collection/collection.module';
 import { DecksModule } from './decks/decks.module';
 import { YgoprodeckModule } from './ygoprodeck/ygoprodeck.module';
 import { HealthModule } from './health/health.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { HealthModule } from './health/health.module';
     }),
     PrismaModule,
     HealthModule,
+    AuthModule,
     CardsModule,
     CollectionModule,
     DecksModule,

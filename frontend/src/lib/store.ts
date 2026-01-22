@@ -2,6 +2,41 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Card, Printing, CollectionItem, Deck, PortfolioType } from "./types";
 
+// Auth Store - User authentication state
+interface User {
+  id: string;
+  email: string;
+  username: string;
+  tier: string;
+}
+
+interface AuthState {
+  user: User | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  login: (user: User, token: string) => void;
+  logout: () => void;
+  updateUser: (updates: Partial<User>) => void;
+}
+
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      token: null,
+      isAuthenticated: false,
+      login: (user, token) => set({ user, token, isAuthenticated: true }),
+      logout: () => set({ user: null, token: null, isAuthenticated: false }),
+      updateUser: (updates) => set((state) => ({ 
+        user: state.user ? { ...state.user, ...updates } : null 
+      })),
+    }),
+    {
+      name: "duelvault-auth-store",
+    }
+  )
+);
+
 // App Store - Global UI State
 interface AppState {
   sidebarOpen: boolean;
