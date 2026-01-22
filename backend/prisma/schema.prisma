@@ -13,19 +13,28 @@ datasource db {
 
 // User model
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  username  String   @unique
-  password  String
-  tier      UserTier @default(FREE)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String         @id @default(uuid())
+  email          String         @unique
+  username       String         @unique
+  password       String
+  tier           UserTier       @default(FREE)
+  searchLanguage SearchLanguage @default(DE)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 
   collectionItems CollectionItem[]
   decks           Deck[]
   wantList        WantListItem[]
 
   @@map("users")
+}
+
+enum SearchLanguage {
+  DE
+  EN
+  FR
+  IT
+  PT
 }
 
 enum UserTier {

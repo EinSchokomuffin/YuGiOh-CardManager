@@ -8,6 +8,7 @@ interface User {
   email: string;
   username: string;
   tier: string;
+  searchLanguage: 'DE' | 'EN' | 'FR' | 'IT' | 'PT';
 }
 
 interface AuthState {
@@ -17,6 +18,7 @@ interface AuthState {
   login: (user: User, token: string) => void;
   logout: () => void;
   updateUser: (updates: Partial<User>) => void;
+  setSearchLanguage: (language: User['searchLanguage']) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -29,6 +31,9 @@ export const useAuthStore = create<AuthState>()(
       logout: () => set({ user: null, token: null, isAuthenticated: false }),
       updateUser: (updates) => set((state) => ({ 
         user: state.user ? { ...state.user, ...updates } : null 
+      })),
+      setSearchLanguage: (language) => set((state) => ({
+        user: state.user ? { ...state.user, searchLanguage: language } : null
       })),
     }),
     {

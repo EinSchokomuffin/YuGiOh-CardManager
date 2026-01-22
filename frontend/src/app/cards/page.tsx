@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Search, Grid, List, Filter, Loader2 } from "lucide-react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { Search, Grid, List, Filter, Loader2, Globe } from "lucide-react";
 import apiClient from "@/lib/api";
 import type { Card } from "@/lib/types";
-import { useCardSearchStore } from "@/lib/store";
+import { useCardSearchStore, useAuthStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -32,9 +32,18 @@ const CARD_TYPES = [
 
 const ATTRIBUTES = ["DARK", "LIGHT", "EARTH", "WATER", "FIRE", "WIND", "DIVINE"];
 
+const LANGUAGES = [
+  { value: "DE", label: "🇩🇪 Deutsch" },
+  { value: "EN", label: "🇬🇧 English" },
+  { value: "FR", label: "🇫🇷 Français" },
+  { value: "IT", label: "🇮🇹 Italiano" },
+  { value: "PT", label: "🇵🇹 Português" },
+] as const;
+
 export default function CardsPage() {
   const { searchQuery, setSearchQuery, filters, setFilters, clearFilters } =
     useCardSearchStore();
+  const { user, isAuthenticated, setSearchLanguage } = useAuthStore();
   
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
@@ -42,8 +51,26 @@ export default function CardsPage() {
   const [page, setPage] = useState(0);
   const limit = 20;
 
+  // Get current search language (default to DE if not logged in)
+  const searchLanguage = user?.searchLanguage || "DE";
+
+  // Mutation to update language preference
+  const languageMutation = useMutation({
+    mutationFn: (language: 'DE' | 'EN' | 'FR' | 'IT' | 'PT') => 
+      apiClient.updatePreferences({ searchLanguage: language }),
+    onSuccess: (data) => {
+      setSearchLanguage(data.searchLanguage);
+    },
+  });
+
+  const handleLanguageChange = (language: string) => {
+    if (isAuthenticated) {
+      languageMutation.mutate(language as 'DE' | 'EN' | 'FR' | 'IT' | 'PT');
+    }
+  };
+
   const { data, isLoading, isFetching } = useQuery({
-    queryKey: ["cards", searchQuery, filters, page],
+    queryKey: ["cards", searchQuery, filters, page, searchLanguage],
     queryFn: () =>
       apiClient.searchCards({
         name: searchQuery || undefined,
@@ -134,6 +161,25 @@ export default function CardsPage() {
             onChange={(e) => setFilters({ archetype: e.target.value || undefined })}
             className="w-[180px]"
           />
+
+          {/* Language Switcher */}
+          <Select
+            value={searchLanguage}
+            onValueChange={handleLanguageChange}
+            disabled={!isAuthenticated || languageMutation.isPending}
+          >
+            <SelectTrigger className="w-[160px]">
+              <Globe className="mr-2 h-4 w-4" />
+              <SelectValue placeholder="Sprache" />
+            </SelectTrigger>
+            <SelectContent>
+              {LANGUAGES.map((lang) => (
+                <SelectItem key={lang.value} value={lang.value}>
+                  {lang.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           <Button variant="ghost" onClick={clearFilters}>
             <Filter className="mr-2 h-4 w-4" />

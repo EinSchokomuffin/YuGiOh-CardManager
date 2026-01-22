@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
-import { RegisterDto, LoginDto, AuthResponse } from './dto/auth.dto';
+import { RegisterDto, LoginDto, AuthResponse, UpdatePreferencesDto } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -50,6 +50,7 @@ export class AuthService {
         email: user.email,
         username: user.username,
         tier: user.tier,
+        searchLanguage: user.searchLanguage,
       },
     };
   }
@@ -77,6 +78,7 @@ export class AuthService {
         email: user.email,
         username: user.username,
         tier: user.tier,
+        searchLanguage: user.searchLanguage,
       },
     };
   }
@@ -99,6 +101,7 @@ export class AuthService {
         email: true,
         username: true,
         tier: true,
+        searchLanguage: true,
         createdAt: true,
         _count: {
           select: {
@@ -106,6 +109,23 @@ export class AuthService {
             decks: true,
           },
         },
+      },
+    });
+    return user;
+  }
+
+  async updatePreferences(userId: string, dto: UpdatePreferencesDto) {
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...(dto.searchLanguage && { searchLanguage: dto.searchLanguage as any }),
+      },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        tier: true,
+        searchLanguage: true,
       },
     });
     return user;

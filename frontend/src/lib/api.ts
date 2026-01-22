@@ -34,7 +34,12 @@ export interface AuthResponse {
     email: string;
     username: string;
     tier: string;
+    searchLanguage: 'DE' | 'EN' | 'FR' | 'IT' | 'PT';
   };
+}
+
+export interface UpdatePreferencesPayload {
+  searchLanguage?: 'DE' | 'EN' | 'FR' | 'IT' | 'PT';
 }
 
 class ApiClient {
@@ -75,6 +80,11 @@ class ApiClient {
 
   async getProfile() {
     const response = await this.client.get("/auth/profile");
+    return response.data;
+  }
+
+  async updatePreferences(payload: UpdatePreferencesPayload) {
+    const response = await this.client.patch("/auth/preferences", payload);
     return response.data;
   }
 
